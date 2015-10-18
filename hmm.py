@@ -1,6 +1,4 @@
 import sys
-import math
-DEBUG = False
 
 
 class HMMPara:
@@ -23,6 +21,7 @@ class HMMProc:
         self.para = HMMPara()
         self.fastaList = fasta
         self.resultMatrix = [[0 for col in range(len(self.fastaList))] for row in range(len(self.para.states))]
+        self.path={}
 
     def hmmProc(self):
         #todo: hmm process
@@ -31,7 +30,7 @@ class HMMProc:
         pi = self.para.start_probability
         states = self.para.states
         result = self.resultMatrix
-        path = {}
+        path = self.path
 
         for i in xrange(len(states)):
             result[i][0] = pi[states[i]]+emit[states[i]][self.fastaList[0]]
@@ -45,24 +44,25 @@ class HMMProc:
                 result[i][j] = prob
                 newpath[states[i]] = path[state] + [states[i]]
             path = newpath
-        if DEBUG:
-            print len(result[0])
-            print result[0]
-            print result[1]
-            print result[2]
+
         return result,path
 
-    def printMatrix(self):
-        print "    ",
+    def resultStr(self):
+        string = '   '
         for i in xrange(len(self.fastaList)):
-            print "%7s" % self.fastaList[i],
-        print
+            string+=str("%8s" %self.fastaList[i])
+        string += '\n'
 
         for i in xrange(len(self.para.states)):
-            print "%.6s: " % self.para.states[i],
+            string += str( "%.6s: " % self.para.states[i])
             for j in xrange(len(self.resultMatrix[0])):
-                print "%.7s" % ("%f" % self.resultMatrix[i][j]),
-            print
+                string += str( "%.7s " % ("%f" % self.resultMatrix[i][j]))
+            string +='\n'
+        return string
+
+    def pathStr(self):
+        print str(self.path)
+
 
 
 class PreProc:
@@ -84,7 +84,7 @@ class FileIO:
         text = inFile.read()
         return text
 
-    def outFile(self,text):
+    def writeFile(self,text):
         outFile = open(self.outFileName,'w')
         outFile.write(text)
 
@@ -98,26 +98,10 @@ if __name__ == '__main__':
     else:
         fileStream = FileIO(sys.argv[1], sys.argv[2])
 
-    if DEBUG:#todo: remember delete
-        print fileStream.inFileName, fileStream.outFileName
-
     DNA = fileStream.readFile()
-    if DEBUG:#todo remove
-        print DNA
 
     DNA_list = PreProc(DNA).preProc()
-    if DEBUG:#todo
-        print DNA_list
-        print len(DNA_list)
-        infi = -float('Inf')
-        print infi+3
-        print '.1: ',  math.log(.1,2)
-        print '.2: ',  math.log(.2,2)
-        print '.25: ', math.log(.25,2)
-        print '.3: ',  math.log(.3,2)
-        print '.4: ',  math.log(.4,2)
-        print '.5: ',  math.log(.5,2)
-
     hmmProc = HMMProc(DNA_list)
     result, path = hmmProc.hmmProc()
-    print path
+    result_txt = 'path: \n'+ str(path)+'\nmatrix:\n'+hmmProc.resultStr()
+    fileStream.writeFile(result_txt)

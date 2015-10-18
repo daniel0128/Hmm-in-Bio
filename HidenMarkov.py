@@ -13,8 +13,6 @@ class HidenMarkov:
                         'S2': {'A': -2.,   'C': -2., 'T': -2., 'G': -2.},
                         'S3': {'A': -3.321928,    'C': -2.321928,  'T': -1.736966,  'G': -1.321928}}
 
-
-
     def print_dptable(self,V):
         print "    ",
         for i in range(len(V)): print "%7s" % i,
